@@ -1,0 +1,30 @@
+services:
+  tgbridge:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - bridge-data:/data
+      # With the local Bot API server (profile "bigfiles") its files are read
+      # from the shared volume:
+      # - botapi-data:/var/lib/telegram-bot-api:ro
+
+  # Optional: a self-hosted Telegram Bot API server, for files over 20 MB
+  # (up to 2 GB). Needs TELEGRAM_API_ID / TELEGRAM_API_HASH from my.telegram.org.
+  # Start with: docker compose --profile bigfiles up -d
+  # and set TELEGRAM_API_URL=http://botapi:8081, TELEGRAM_LOCAL_MODE=true in .env
+  # (first call logOut on the public server once: see README).
+  botapi:
+    profiles: ["bigfiles"]
+    image: aiogram/telegram-bot-api:latest
+    restart: unless-stopped
+    environment:
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID:-}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:-}
+      TELEGRAM_LOCAL: "1"
+    volumes:
+      - botapi-data:/var/lib/telegram-bot-api
+
+volumes:
+  bridge-data:
+  botapi-data:

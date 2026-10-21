@@ -1,0 +1,4 @@
+/tgbridge
+/data/
+.env
+*.enc
